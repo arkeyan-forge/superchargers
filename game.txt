@@ -1,0 +1,10 @@
+# What the player kit's Arkeyan-Builder knows about this game. No game data: the hash identifies the player's own default.xex and
+# must be the one games/superchargers/info.cpp accepts. In the kit from 0.9.0.
+id=superchargers
+name=Skylanders SuperChargers
+runtime=Skylanders SuperChargers
+version=0.0.1
+toml=SuperChargers.toml
+# Disc shaders: one archive, IGA v11 big-endian / IGZ v9 (games/superchargers/docs/shaders.md).
+shaders=igz:/archives/shaders_xenon.pak
+xex_sha256=02ff6672d460c9aaa54e69d584af67a7138c6c93cde5e04b0da4284207be7c61
