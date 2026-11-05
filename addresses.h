@@ -40,7 +40,40 @@
 #define GAME_HOOK_BinkOpen sub_831C9218
 #define GAME_HOOK_BinkClose sub_831C9F38
 
+// SKY_LEVEL (engines/alchemy/zone_request.cpp): the zone list's lookup by name, (list, const char* name) -> the zone or 0. It copies
+// the name into its own buffer, turns its backslashes into slashes and hashes it; "academy/academy" is looked up through it
+// (sub_829C2078). Two callers matter: sub_82DF9528 enters the zone the game asked for next (a global string object, +44) and
+// looks it up, returning to 0x82DF95E8; sub_82A229F0 looks up the zone being left (0x82A22CC0).
+#define GAME_HOOK_Zone_Find sub_82DF1C58
+// Entering the zone the game asked for next, (enter object) -> ...: it copies the request (game::ZoneRequest) into its object
+// and looks the zone up (above); the loader then names the zone's archive and package from that name.
+#define GAME_HOOK_Zone_Enter sub_82DF9528
+
+// Languages (games/superchargers/language.cpp, boot.md "Text and voice language"): Language_Get is the title's one reader of the
+// console language, XGetLanguage (sub_83567248) mapped to an IG_CORE_LANGUAGE value (6 English, 9 German) by a jump table,
+// returned in r3: Swap Force's sub_823EFC68 instruction for instruction (sigmatch 0.62, fuzzy only for the table's
+// addresses). Language_SoundPak opens one sound package of a sound set, "%s/%s_%s.pak" (the string's only user, and a
+// caller of Language_Get). Movie_Open starts a movie (r3: the movie; its description at +32, the language's Bink track id at
+// +56), calling BinkOpen: BinkOpen's only caller, Swap Force's shape (Trap Team's sigmatch 0.76 points at it too).
+#define GAME_HOOK_Language_Get sub_824D7E10
+#define GAME_HOOK_Language_SoundPak sub_8276BA98
+#define GAME_HOOK_Movie_Open sub_826FB690
+
+// Ultrawide (games/superchargers/ultrawide.cpp, docs/runtime/gpu/ultrawide.md): sub_826E8718 computes a render-target pass's
+// size, Trap Team's layout (explicit +32/+36, scales +40/+44, result +92/+96; the only user of the targets' format names that
+// Swap Force's sub_8258EBE8 has, "b8g8r8_tile_big_wii"...; Trap Team's sigmatch 0.53 put its candidate 0x38 before it). The
+// projection builder sub_8250E610 (Trap Team's sigmatch 0.9): its world camera caller sub_82B0BC00 is Swap Force's
+// sub_82B992A8 (shape 0.62, the next 0.32).
+#define GAME_HOOK_Ultrawide_ScenePass sub_826E8718
+#define GAME_HOOK_Ultrawide_Projection sub_8250E610
+// The scene at full resolution (game::Adapter::fullScene): sub_82600C10 splits a set of targets into tiles past the console's
+// 2048 EDRAM tiles: Swap Force's sub_825138F8 and Trap Team's sub_823EBCD0 instruction for instruction (shape 1.00).
+#define GAME_HOOK_Scene_Tiles sub_82600C10
+// The final composite (the scene into the frame) is an indexed quad, as Swap Force's.
+#define GAME_ULTRAWIDE_COMPOSITE_INDEXED
+
 #include <cstdint>
+#include <string_view>
 
 namespace game
 {
@@ -57,11 +90,23 @@ namespace game
         0x8370CE70; // sigmatch 1.0 (Trap Team's and Swap Force's), via Xma1_LockAll
     constexpr uint32_t DeviceGlobal = 0;
     constexpr uint32_t UltrawideDisplayAspect = 0;
-    constexpr uint32_t UltrawideSceneWidth = 0, UltrawideSceneHeight = 0;
-    constexpr bool UltrawideSceneKeepsArea = false;
-    constexpr uint32_t UltrawideCompositeVertices = 0;
+    // The scene's 1040x620 (81 % of the frame, its root pass's explicit size: run scU1), as Swap Force's and Trap Team's.
+    constexpr uint32_t UltrawideSceneWidth = 1040, UltrawideSceneHeight = 620;
+    constexpr bool UltrawideSceneKeepsArea = true;
+    constexpr uint32_t UltrawideCompositeVertices = 6;
     constexpr int UltrawideCompositeSlot = 0;
     constexpr bool UltrawideCompositeVpos = false;
-    constexpr uint64_t HostKernelPixelShader = 0;
-    constexpr uint32_t HostKernelThreshold = 0;
+    // The post pass whose constants and fetch offsets give its kernel in guest pixels: at scale N, in host pixels. FXAA 3.11
+    // into the 1040x620 scene (c0, c1 = +-0.5, 8, -4 over the size; c2 sharpness 8, c3 threshold 0.125, c4 minimum 0.05),
+    // the layout of Trap Team's.
+    constexpr uint64_t HostKernelPixelShader = 0x732669B14C8E3386ull;
+    constexpr uint32_t HostKernelThreshold = 12; // the threshold (c3) and the minimum (c4), after c2 (sharpness)
+    // SKY_LEVEL: the return address of the zone lookup that enters a zone, and the zone a new game enters after its intro
+    // and the rift tunnel ride (the opening is intro/intro; the menus are ui/mainmenubackground/mainmenubackground).
+    constexpr uint32_t ZoneEnterReturn = 0x82DF95E8;
+    // The next zone the game asks for: the object at this global's pointer holds it at +44, a string object (one word, the
+    // text, interned in the engine's string pool when copied; sub_824AD560 copies one).
+    constexpr uint32_t ZoneRequest = 0x83764394, ZoneRequestName = 44;
+    constexpr std::string_view ZoneAfterIntro = "intro1/intro1";
+    constexpr std::string_view ZonePrefix = ""; // zones are <map>/<map>
 }
