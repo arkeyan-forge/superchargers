@@ -10,20 +10,12 @@ switch_table_file_path = "SuperChargers_switch_tables.toml"
 
 skip_lr = false
 skip_msr = false
-ctr_as_local = true
-xer_as_local = true
-reserved_as_local = true
-cr_as_local = true
-non_argument_as_local = true
-non_volatile_as_local = true
-# Functions XenonRecomp keeps in the context (every register a PPCContext field): they read a register their caller
-# set outside the ABI. Written by tools/xenonrecomp/local_reads.py --toml (docs/tools/toolchain/xenonrecomp.md).
-context_functions = [
-    0x825840F8, 0x82584660, 0x831D9B38, 0x83361B60, 0x83361CB0, 0x83362708, 0x833633B8, 0x833C1080,
-    0x834AC490, 0x834B2940, 0x834BA7F8, 0x834C1A58, 0x8350EF18, 0x83531260, 0x83531D58, 0x83532858,
-    0x835339A8, 0x83534778, 0x83567F34, 0x83568400, 0x83568790, 0x835B4788, 0x835B6438, 0x835B6BF8,
-    0x835C1418, 0x835F1324, 0x836000E8, 0x83606250, 0x836064F4, 0x8365D628, 0x8369BEA8, 0x836C14A0,
-]
+ctr_as_local = false
+xer_as_local = false
+reserved_as_local = false
+cr_as_local = false
+non_argument_as_local = false
+non_volatile_as_local = false
 
 restgprlr_14_address = 0x835EF790
 savegprlr_14_address = 0x835EF740
@@ -36266,16 +36258,3 @@ functions = [
     { address = 0x836EB440, size = 0xC },
     { address = 0x836EB450, size = 0xC },
 ]
-
-# The render thread's wait for its last swap to be shown (sub_826718D0, and the same loop in sub_82603218): a spin on the
-# D3D device's swap counts (r11 the device, r10 the swaps issued, +16976 the swaps shown), inlined as in Trap Team, made a
-# wait for the next graphics interrupt (engines/alchemy/swap_wait.cpp). At the top of the loop, so it runs at each turn.
-[[midasm_hook]]
-name = "AlchemySwapWait"
-address = 0x8267196C
-registers = ["r10", "r11"]
-
-[[midasm_hook]]
-name = "AlchemySwapWait"
-address = 0x82603324
-registers = ["r10", "r11"]

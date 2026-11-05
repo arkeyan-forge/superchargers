@@ -35,10 +35,3 @@ From the image's strings only (names, no code read yet):
   answers SuperChargers' four-byte id (`runtime/host/portal_identity.cpp`, `02 0A 03 02`; checked by `SSAPortalTest` only) [V].
 - **Next**: the toy and variant tables from the disc (method in [collection.md](https://github.com/arkeyan-forge/forge/blob/main/docs/runtime/host/collection.md)) to check the 44
   catalogue rows (20 vehicles, 20 SuperChargers, 4 trophies; public lists so far), then `SKY_PORTAL_LOG=1` with a vehicle on the emulated portal.
-
-## Level archives: deflate chunks (2026-11-05)
-`Academy.pak`, `Intro1.pak`, `JuiceDomain_Town.pak` and `LooseFiles.pak` open with our IGA reader (`runtime/host/art/alchemy_archive.cpp`), but
-their entries' mode has **1** in its top 4 bits, not LZMA's 2: each 0x8000-byte chunk is a little-endian u16 length and a **raw
-deflate** stream [V] (the Academy's scripts and texts decoded whole by a scratch tool, `private/superchargers/garage/tool/`). The next
-chunk does not start at the archive's 0x800 alignment; the scratch tool finds it by trying the next 64 bytes, so the real rule is
-not known [?]. The reader decodes LZMA only, which is enough for the badges and the fonts ([art.md](art.md)).

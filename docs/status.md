@@ -12,45 +12,20 @@
 
 The disc stays outside git; everything derived from it is in `private/superchargers/` (day 1: `private/superchargers/day1/`).
 
-## Status (day 4, 2026-11-04)
-Codegen, build and boot work; the picture is right; **a new game reaches the Academy (the hub)**: the intro and the rift tunnel ride,
-then `SKY_LEVEL=academy` (or, without it, `intro1` on foot), and **a continue from the save goes straight to the Academy**; 30 fps,
-no fault. The automatic test is `tools/regress/superchargers_lobby.sh` ([boot.md](boot.md) "SKY_LEVEL and the test").
+## Status (day 2, 2026-11-04)
+Codegen, build and boot work; the picture is right; **the first level plays with a figure and a vehicle**: the rift tunnel ride, Crypt
+Crusher driven by Fiesta, at 30 fps with no fault over 335 s [V] ([boot.md](boot.md)).
 
 | Step | Result |
 |---|---|
 | Codegen | clean after three recompiler additions (`patches/xenonrecomp.patch`): `vadduhs`, `vpkuwum128`, `vpkd3d128` FLOAT16_2; 102087 functions, 0 trap left in the generated code |
 | Build | `build-superchargers` links (`Skylanders SuperChargers`, bundle `SSCRecomp`); 0 warnings in `games/superchargers/` |
 | Picture | right since two renderer fixes (the scissor with the test off, 16-bit pair positions; [boot.md](boot.md) "The black frame") |
-| Story | the menus, `fmv01`, the intro, the tunnel ride with a vehicle, `intro1` on foot (1245 draws a frame, 30 fps), the Academy |
+| Movies | `bumper_vvisions.bk2` and `fmv01.bk2` play (Bink 2) |
+| Menus | the title, the play style, the saves `SUPERCHARGERS_OPTIONS` and `SUPERCHARGERS_0` |
+| First level | the intro cutscene, then the rift tunnel ride with a vehicle; RT accelerates, gearbits are collected |
 | Figures | Fiesta (`new:3400`) and Crypt Crusher (`new:3227`), generated blank tags, are read and played; the instant vehicle also works |
 | Shaders | from the disc: IGA v11 big-endian, IGZ v9, 1207 containers ([shaders.md](shaders.md)) |
-| The launcher's look | logo, background, 469 portraits, the menu theme, from the disc ([art.md](art.md)) |
-
-## The details the earlier ports got wrong first (2026-11-04)
-Each checked in SuperChargers with a log line or a shot (runs under `private/runs/`); [V] seen, [?] not checked.
-
-| Detail | Result |
-|---|---|
-| Movies | the logos (`bumper_atvi`, `bumper_vvisions`; the adapter lists them for `skip_intro_movies`) and `fmv01` (3905 frames, its file read to the end) play [V]; at 21:9 with black bars [V]. **Y ends `fmv01`** (and any story movie) as Imaginators' Y: the game's own cutscene skip never comes, so the port cuts the movie at the frame it shows and the game goes on as at its end (run `skD`: the intro 100 s sooner); Start pauses it [V] ([boot.md](boot.md), "Movies: the skip") |
-| Text and voices | this disc has English and German only (1146 `.lng` and 347 voice banks each, no French). `--language de`: every voice and text bank opened is `_de` (118), none `_en` [V]. **Voices in another language** (`voice_language`): Swap Force's hooks re-addressed, `voices en (6), text 9` [V]; a movie's voice track (5 English, 6 German) switched [?] ([boot.md](boot.md), "Text and voice language") |
-| Sound | not silent: 20898 non-silent 1024-sample blocks in a 455 s run, 0.00 % repeated (`analyze.py audio`) [V] |
-| HUD and prompts | the HUD (portrait, gearbits, health), the game's own Xbox 360 button prompts ("Hold RT to Accelerate!") [V]. **Glyphs**: the fonts' two button pictures redrawn in memory (Swap Force's way): the pause menu's hints follow PS5, Switch, the keyboard's keycaps and the 360 [V] ([art.md](art.md), "Button pictures"); the world's 3D prompts are a face and letters of geometry: the **RB** one follows the device (PS5 R1, a keycap, the 360's unchanged) [V], the others are not replaced yet ([art.md](art.md), "World prompts") |
-| Save and continue | `SUPERCHARGERS_OPTIONS` and `SUPERCHARGERS_0` written; Continue reads them and loads the Academy [V]; Swap Force's save-task race is not in this game's code (no hook) [V] |
-| Portal prompt | **the Toy Box opens by itself** on Vehicle 1 at "Please place a LAND VEHICLE", then on Player 1 for the Skylander; both seated and taken (run `scP1`); **player 2** joining in the Academy: the Toy Box opens on Player 2, Eruptor seated and taken (run `scL2`) [V] ([toybox.md](toybox.md), "The portal prompt", "Player 2") |
-| Toy Box (F6) | opens over the Academy: 469 portraits read from the disc, the seats Player 1, Vehicle 1, Player 2, Vehicle 2, Magic item, Fiesta and Crypt Crusher seated [V]; their cards show drawn icons until the catalogue has SuperChargers' portrait keys |
-| Outlines at scale 2 | the FXAA pass (`732669B14C8E3386`) is `HostKernelPixelShader`, so its kernel stays in guest pixels at scale 2, as Trap Team's. **Side by side** (the Academy from the same save and camera, the full-resolution scene, scale 1 run `scS4` against scale 2 run `scS1`, crops enlarged twice: `private/runs/outlines_scale1_vs_2.png`): the same outlines on Fiesta and the scenery, sharper at 2, none doubled or thinned [V] |
-| Water and lava above 30 FPS | not measured: no water simulation pass found yet (`stepPassShaders` empty); the image names `_applyWaterSimulationNormals` and ripple settings, so one may exist in a water level [?] |
-| Ultrawide and the scene | the 3D at full resolution (1040x620 -> 1280x720) and **ultrawide**: 21:9 (2560x1080: scene 1696x720, Hor+ 80 -> 96.4 degrees) and 32:9 (3840x1080: scene bounded to 2048x576, 118.4 degrees; a 2560x720 scene stopped the game in the Academy), HUD and menus at 16:9 [V] ([ultrawide.md](https://github.com/arkeyan-forge/forge/blob/main/docs/runtime/gpu/ultrawide.md), "SuperChargers") |
-| 60 FPS | the game asks for interval 2 and paces on it (as Swap Force): `presentIntervalPacesGame`; at `--fps-limit 60` the menus and the intro run at 60.0 fps, `intro1` at 58.4-60 (1330 draws), the story at its pace (`intro1` at 321 s against 329 s at 30) [V]. The Academy (1280 draws) held 58.3 fps with the renderer at 11.2 ms a frame; with the 16-bit pair streams in the buffer cache and the swap spin made a wait (2026-11-04, [renderer_threads.md](https://github.com/arkeyan-forge/forge/blob/main/docs/runtime/gpu/renderer_threads.md) "SuperChargers and Imaginators at 60"): renderer 6.0 ms, **59.9 fps held**, gap p99 19 ms, process CPU 38.6 -> 31.6 ms a frame; with the drop to 30 on, no drop: the Academy 60.0 fps, `intro1` 59.2, `sky1` 59.1 [V]. The other 12 zones (sky2-3, nat1-3, quest1-3, mag1, dark1, final1-2) all hold **59.9-60.0 fps with the drop on, 0 drops in their window** (2026-11-05; one drop to 30 in `nat1`'s load, then back; [renderer_threads.md](https://github.com/arkeyan-forge/forge/blob/main/docs/runtime/gpu/renderer_threads.md) "The tour"): `tools/perf/game_perf.sh superchargers <disc> <map> 60 <out>` with `SECONDS_TO_RUN=470` |
-
-## Nightmare (2026-11-05) [SuperChargers] [V]
-**Offered from the start**: a new game's "Choose your play style!" (the difficulty, after the title) has four cards, Adventurer
-highlighted; the fourth, **Nightmare** ("Only for the most advanced players with a vast army of Skylanders! +30% Rewards"), has no
-padlock on a new save, and A takes it: `SUPERCHARGERS_0` is written and `fmv01` starts (runs `nm-sc-explore`, `nm-sc-accept`). The
-executable has no `nightmare_difficulty_unlocked` (Swap Force's and Imaginators' lock) and no other unlock name for it. So
-`nightmare_from_start` does nothing here (no `SetNightmareFromStart`: the runtime logs that it is ignored), and the launcher shows no
-toggle for this game.
 
 ## Where to start
 - Build: `cmake -S . -B build-superchargers -G Ninja -DCMAKE_BUILD_TYPE=Release -DSSA_GAME=superchargers`, `nice ninja -C build-superchargers -j4 ArkeyanRuntime`
@@ -61,8 +36,7 @@ toggle for this game.
   ([boot.md](boot.md) "To the first level").
 
 ## Open problems
-1. Vehicles: the owner's 90 dumps are blank; the garage's upgrades are mapped and shown (shield and weapon, [V]), the mods are
-   not. The garage is the Academy's Upgrade Vehicle Station, opened by the story after Chapter 1, not by the `SKY_LEVEL` save
-   (found on the disc, not reached in a run: [toybox.md](toybox.md), "The garage"). The Dead state is met [V]; Vehicle 2's prompt and the error state not.
-2. Glyphs: the turbo pictures (`Turbo_A/X/Y`, not met) and the world's 3D prompts but RB (A/Y and B share a face; the others not met in a run, [art.md](art.md), "World prompts").
-3. Two stubs on the boot path: `XamUserReadProfileSettings` and `XMsgCancelIORequest` (answered 0; nothing seen wrong).
+1. Past the tunnel ride: the next areas, on foot, not reached yet.
+2. The engine hooks of Swap Force's line (zones for `SKY_LEVEL`, language, save task, ultrawide, the portal prompt `CMagicMoment`): re-find by hand.
+3. Vehicles: the tags are blank ones of our generator (no real dump); the vehicle's own data (mods, gear) is unknown ([research.md](research.md)).
+4. Audio not checked (runs use the disk driver); 60 FPS, ultrawide, glyphs, language: not started.
