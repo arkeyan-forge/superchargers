@@ -101,11 +101,10 @@ PPC_FUNC_IMPL(GAME_IMP(Ultrawide_Projection));
 // display's aspect (its viewport object's +8, times the camera's +212) and a fixed horizontal field of view, so a wider
 // aspect alone only crops the picture. Hor+ (the other games'): from that call the aspect is the window's and the horizontal
 // field grows so that the vertical one stays what 16:9 gave. The HUD's 3D cameras and the shadow maps are left alone.
-constexpr uint32_t WorldCameraCall = 0x82B0BCA4;
 PPC_FUNC(GAME_HOOK(Ultrawide_Projection))
 {
     constexpr double Wide = 16.0 / 9.0;
-    if (!ultrawide::Active() || ctx.f1.f64 <= 0 || uint32_t(ctx.lr) != WorldCameraCall ||
+    if (!ultrawide::Active() || ctx.f1.f64 <= 0 || uint32_t(ctx.lr) != game::UltrawideWorldCameraCall ||
         std::fabs(ctx.f3.f64 - Wide) >= 0.01)
     {
         GAME_IMP(Ultrawide_Projection)(ctx, base);

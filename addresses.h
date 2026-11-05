@@ -96,6 +96,8 @@ namespace game
     constexpr uint32_t UltrawideCompositeVertices = 6;
     constexpr int UltrawideCompositeSlot = 0;
     constexpr bool UltrawideCompositeVpos = false;
+    // The return address of the world camera's projection call (sub_82B0BC00), the one Ultrawide_Projection widens.
+    constexpr uint32_t UltrawideWorldCameraCall = 0x82B0BCA4;
     // The post pass whose constants and fetch offsets give its kernel in guest pixels: at scale N, in host pixels. FXAA 3.11
     // into the 1040x620 scene (c0, c1 = +-0.5, 8, -4 over the size; c2 sharpness 8, c3 threshold 0.125, c4 minimum 0.05),
     // the layout of Trap Team's.
