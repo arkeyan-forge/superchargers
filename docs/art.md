@@ -39,7 +39,7 @@ style yet [?]) come from two pictures named in the fonts, which
 | Info font's buttons, 256x168, 32-bit tiled ARGB | `fonts/ProximaNova-Info.igz` (`languagestartup.pak`), `igImage2` 1 | **Swap Force's own** (the same XXH3 of the first 4096 bytes, `7360B650D459A892`; components measured again: the same boxes): Swap Force's cells, without its added Start cell (SuperChargers has no START hook) [V] |
 | Body font's buttons, **128x209**, 32-bit tiled ARGB | `fonts/ProximaNova-Body.igz` (`essentialui.pak`), `igImage2` 1, `402F2F6915FA96F8` | new layout, two buttons a row: A 1,2-38,39 · B 44,1-80,39 · Y 85,1-123,39 · X 2,42-39,80 · LB 44,49-105,76 · LT 4,83-40,121 · RT 49,83-86,121 · RB 3,131-65,158 · LS 73,125-110,161 · RS 5,166-42,202; a D-pad at 47,164-88,202 has no glyph and stays [V] |
 | `Turbo_A`, `_X`, `_Y` (88x88 DXT5) | `permanent_xenon.pak`, `textures@!ui!ButtonPrompt!XENON!turbo!` | not listed: the renderer hashes a tiled level padded to 32x32 blocks (16 KB) and the file stores 11 KB, so the hash cannot be taken from the disc; no run reached a turbo prompt [?] |
-| World prompts `models/UI/ButtonPrompt/XENON/{A,B,X,Y,LT,RB,Mash_*,RS_*,...}` | `permanent_xenon.pak` | meshes coloured by 4x4 colour maps, as Swap Force's: stay the 360's (stream G) |
+| World prompts `models/UI/ButtonPrompt/XENON/{A,B,X,Y,LT,RB,Mash_*,RS_*,...}` | `permanent_xenon.pak` | two meshes, a face and the letters, coloured by a flat 4x4 map and a tint: **RB replaced** (below, 2026-11-05) [V]; the others are listed, not replaced |
 | Controller pictures (`ui!Controllers!Xbox_Controller`...) | | not replaced |
 
 How (about 1 h): the two archives extracted from the disc (`tools/shaders/xdvdfs.py`) into `private/superchargers/disc/`, their pictures
@@ -49,3 +49,37 @@ Proof (run `scU2`, a continue into the Academy, 2560x1080, `SKY_GLYPHS_SCRIPT=ps
 `body font buttons 128x209 found in guest memory at AC6D6000`, `info font buttons 256x168 found ... at AC57A000`, each `drawn as`
 keyboard, playstation, nintendo, keyboard, xbox360; the pause menu's hints in the shots: cross, circle, triangle; B, A, X (Nintendo, by
 position); Space, X, V keycaps; the 360's A, B, Y.
+
+## World prompts (2026-11-05) [Alchemy] [SuperChargers] [V]
+**What they are.** `permanent_xenon.pak` holds 19 prompt models (`models/UI/ButtonPrompt/XENON`: A, B, X, Y, LT, RB, B_Hold, Mash_A/B/X/Y,
+LS_Waggle, RS_*) with their vfx and five flat 4x4 maps (`ColorMap...Yellow_Y`, `Green_A`, `Red_B`, `Blue_X`, `Blue_Letters`). Each model is
+two indexed meshes (A: 87 and 633 indices; RB: 816 and 2706): a flat face and the letters of the button on it. Positions are SHORT4N,
+texture coordinates FLOAT16_2, stride 20 or 24. The face's pixel shader samples a flat map (the RB pill samples the white default map; its
+colour is a tint), so no texture holds the button. The index arrays of the disc (the `igIndexBuffer` of the model, found in the
+decompressed entry by its shape, a scratch tool on `runtime/host/art/alchemy_archive.cpp`) hash, as the renderer hashes them, to
+the draw's: RB's face `21E1098D0C5EEC4F` (816) and letters `7F26CABF048F8787` (2706) are the ones the game draws [V].
+
+**Where one shows.** The Academy (a continue from the lobby test's save, `tools/regress/superchargers_lobby.sh`): Fiesta walking up
+from the start platform (`lup` held 9 s at 165 s), an RB pill floats by the platform's NPC (white, "RB" in cyan: the interaction prompt). The tutorial level (`intro1`) showed none in a walk to its first fight; A, B, X, Y, the triggers and the mash prompts were not met in a run [?].
+
+**How it is replaced** ([input.md](https://github.com/arkeyan-forge/forge/blob/main/docs/runtime/xbox360/input.md), "World prompts"; adapter `GlyphPrompts`, `GlyphTextures`): the
+letters' draw is skipped, the face gets the style's glyph on a dark plate as its texture (320x128, the pill's shape), with texture
+coordinates spread over its bounding box (`uAxis` 0, `vAxis` 1, v flipped). The game's shader stretches u about its middle by 2.55
+(measured with a gradient picture, the pill spans u 0 to 1 at 0.31 to 0.70 of its length), so `uScale` 2.55 writes it divided.
+
+| Style (`--glyphs`) | The RB prompt in the Academy (`private/prompts3d/proof/`) |
+|---|---|
+| `playstation` | a dark pill, "R1" |
+| `keyboard` | a white keycap pill, "E" (the default RB key) |
+| `xbox360` | the game's white pill with "RB" in cyan, unchanged |
+
+Run: `private/runs/p3d-scF-{playstation,keyboard,xbox360}`, the lobby test's save, `SKY_PRESS` A to the menus, `lup:165:9`, `SKY_GPU_SNAPSHOT_SECONDS=190`.
+
+**Left.** A and Y share one face (87 indices), B, B_Hold and Mash_A/B/Y another (609): the renderer now tells them by their letters,
+which the game draws right after the face (it holds the face for one draw, [input.md](https://github.com/arkeyan-forge/forge/blob/main/docs/runtime/xbox360/input.md), "World prompts"; unit-tested,
+and run with RB). What is missing is a prompt to measure: A, B, X, Y, LT, the Mash and B_Hold prompts were **not met in a run** (the Academy's
+start platform, the walk to the tutorial's first fight, the tunnel ride), so their `uAxis`/`vAxis`/flips and `uScale` (2.55 for the pill: the
+shader's stretch of u, which a disc may not have) are not measured and no row is listed; the meshes' signatures come from the disc
+(`permanent_xenon.pak`, the decompressed entries scanned for their index arrays, A: 87 and 633 indices, X: 609 and 624, LT: 114 and 2148,
+the same method as RB's) and a row is one line per prompt once one is seen. The effects (`vfx/UI/ButtonPrompt`: rings, sparks) and `Turbo_A/X/Y` (the
+vehicle's HUD) stay the 360's.

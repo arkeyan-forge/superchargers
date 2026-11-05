@@ -89,6 +89,16 @@ namespace
         { 0x7360B650D459A892ull, "info font buttons 256x168", 256, 168, 196608, InfoButtons },
     };
 
+    // The 3D prompts that float in the world (models/UI/ButtonPrompt/XENON in permanent_xenon.pak): a face and the letters
+    // on it, coloured by one tiny map (games/superchargers/docs/art.md, "World prompts"). Indices as stored.
+    constexpr uint64_t RbPicture = 0xB0770000000000A1ull; // the key of its picture's row, no guest texture has it
+    constexpr glyphs::Texture GlyphTextures[] = {
+        { RbPicture, "world prompt RB", Glyph::RightBumper, {}, false, false, nullptr, true },
+    };
+    constexpr glyphs::Prompt GlyphPrompts[] = {
+        { 816, 0x21E1098D0C5EEC4Full, 2706, 0x7F26CABF048F8787ull, RbPicture, 320, 128, 0, 1, false, true, 2.55f },
+    };
+
     // The two start-up logos (skip_intro_movies); the story movies (fmv01...) always play.
     constexpr std::string_view IntroMovies[] = { "bumper_atvi", "bumper_vvisions" };
 
@@ -101,9 +111,9 @@ namespace
     constexpr uint32_t MaxSceneWidth = 2048;
 
     // SKY_LEVEL is zone.cpp's (the zone's name, not a file redirect: firstLevel stays empty).
-    const game::Adapter g_adapter = { g_gameInfo, ReadPortalPrompt, true, superchargers::SetVoiceLanguage, {},
-        IntroMovies, false, nullptr, {}, GlyphImages, true, { 1280, 720 }, nullptr, nullptr, 0, {}, {}, {}, MenuLevels,
-        MaxSceneWidth };
+    const game::Adapter g_adapter = { g_gameInfo, ReadPortalPrompt, true, superchargers::SetVoiceLanguage,
+        GlyphTextures, IntroMovies, false, nullptr, {}, GlyphImages, true, { 1280, 720 }, nullptr, nullptr, 0, {}, {},
+        {}, MenuLevels, MaxSceneWidth, GlyphPrompts };
 }
 
 const game::Adapter& game::Current() { return g_adapter; }
