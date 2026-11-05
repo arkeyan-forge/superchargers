@@ -98,12 +98,24 @@ as before; **the voices can now follow another one** (`[audio] voice_language`, 
 Run `scU1` (`SKY_LANGUAGE=de SKY_VOICE_LANGUAGE=en`): `[language] sound packages: voices en (6), text 9`; the movie track logged 6 (that
 build mapped German to 7, fixed since; the movie's voice switch is not re-run [?]).
 
-## Movies: the skip (2026-11-04) [?]
-`fmv01` is not skipped by Y (taps at 50 s and a 2 s hold at 56 s), X, B or A; **Start pauses it** ("PAUSIERT", the movie frozen to the
-end of run `scU1`). The game has an info message with the states `eIMS_Loading`, `eIMS_SkipAttempt`, `eIMS_SkipWait`, `eIMS_Paused`
-and the texts `_pressToSkip`, `_tapToSkip`, `_waitToSkip`, `_readyToSkip` (`CJuiceBehaviorInfoMessage`, `get_ReadyToSkip_Internal`), and
-the movie manager a `P_allowMoviePlayerSkip`: a skip waits for something to be "ready" (the level behind the movie loaded, likely) that
-was not found. The intro's archives open at 42.3 s, with the movie. Not fixed.
+## Movies: the skip (2026-11-05) [V]
+**Y ends a story movie** (`fmv01`), as Imaginators' Y: the adapter's `storyMovieSkipButton` (0x8000); a new Y press read by the title
+while a story movie plays (not a logo of `skip_intro_movies`) sets the movie's Bink frame count (HBINK+8) to the frame it shows
+(+12) plus one, and the game goes on as at the movie's end (`runtime/d3d/bink_display.cpp`, `game::StoryMovieButtons`, called by
+`XamInputGetState` for the first pad). Run `skD` (a new game, Y at 52 s): `[movie] skipped fmv01 at frame 411 of 3905 (the skip
+button)`, the vehicle's intro drawn, `prompt for player 1's vehicle`, `souljam.pak` at 91.5 s (195 s when the movie plays); the
+same with the movie cut at its first frame (`SKY_SKIP_MOVIES=1`, run `skC`): 61 s. No new fault or stub.
+
+**Why the game's own skip never comes** (runs `skA`, `skB`, debug hooks taken out since). `fmv01` is a cutscene
+(`FMV01.pak`: `CCutsceneStage`, `CutsceneActionPlayMovie`, its voice lines). The skip test, `sub_82E7C950`, skips when the byte
+**`0x8377677B`** (the info message's `get_ReadyToSkip_Internal`, `sub_82EA9988`) is set and `sub_829E2CD8` allows it (`this+233`,
+`PROGRAMMER_VARS` `AlwaysAllowSkipping`, never `Finale01_Outro`, the online checks), or when `sub_8298E780` says so. The byte is
+set only by the info message's handler of `CGuiEventNetSkipCutscene` (`sub_82F028E0` -> `sub_82EF1490`), an event made by name
+from the game's scripts (its type `0x83777264` has no caller in the code), and cleared at each cutscene's start and end
+(`sub_82EF1550`, `sub_82EEA7D8`). During `fmv01` the title reads every press (A, X, Y, B: `SKY_INPUT_LOG`), but the info
+message's handler gets no skip state at all, only Start's pause (state 4) and its end (0); the byte stays 0 to the movie's end.
+So the cutscene never offers its skip on this path; which script condition holds it back (a first viewing, the online layer) is
+not found [?]. Imaginators' info message has a settable `ReadyToSkip` and no `AlwaysAllowSkipping`: another design.
 
 ## Save tasks (2026-11-04) [V]
 Swap Force's stop at the save slots (its task start cleared the done flag after starting the worker thread) **does not exist here**:

@@ -105,6 +105,10 @@ namespace
     // The front end: the game's own menus (zone.cpp names the zones it enters).
     constexpr std::string_view MenuLevels[] = { "ui/mainmenubackground/mainmenubackground" };
 
+    // fmv01's own skip never comes (its cutscene ignores every button; games/superchargers/docs/boot.md, "Movies: the
+    // skip"): Y ends a story movie, the button Imaginators skips with.
+    constexpr uint16_t SkipButtonY = 0x8000;
+
     // A 2560x720 scene (a 32:9 window at full resolution) stopped the game as it entered the Academy, at both resolution
     // scales, with a thread deep in a recursive walk (sub_8283F448) and the others waiting; 1696x720 (21:9) and the original
     // resolution's 1280x360 at 32:9 play (runs scU2, scU8, scU10). Wider windows get a scene this wide, less high.
@@ -113,7 +117,7 @@ namespace
     // SKY_LEVEL is zone.cpp's (the zone's name, not a file redirect: firstLevel stays empty).
     const game::Adapter g_adapter = { g_gameInfo, ReadPortalPrompt, true, superchargers::SetVoiceLanguage,
         GlyphTextures, IntroMovies, false, nullptr, {}, GlyphImages, true, { 1280, 720 }, nullptr, nullptr, 0, {}, {},
-        {}, MenuLevels, MaxSceneWidth, GlyphPrompts };
+        {}, MenuLevels, MaxSceneWidth, GlyphPrompts, SkipButtonY };
 }
 
 const game::Adapter& game::Current() { return g_adapter; }
