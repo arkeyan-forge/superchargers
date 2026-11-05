@@ -44,6 +44,14 @@ Each checked in SuperChargers with a log line or a shot (runs under `private/run
 | Ultrawide and the scene | the 3D at full resolution (1040x620 -> 1280x720) and **ultrawide**: 21:9 (2560x1080: scene 1696x720, Hor+ 80 -> 96.4 degrees) and 32:9 (3840x1080: scene bounded to 2048x576, 118.4 degrees; a 2560x720 scene stopped the game in the Academy), HUD and menus at 16:9 [V] ([ultrawide.md](https://github.com/arkeyan-forge/forge/blob/main/docs/runtime/gpu/ultrawide.md), "SuperChargers") |
 | 60 FPS | the game asks for interval 2 and paces on it (as Swap Force): `presentIntervalPacesGame`; at `--fps-limit 60` the menus and the intro run at 60.0 fps, `intro1` at 58.4-60 (1330 draws), the story at its pace (`intro1` at 321 s against 329 s at 30) [V]. The Academy (1280 draws) held 58.3 fps with the renderer at 11.2 ms a frame; with the 16-bit pair streams in the buffer cache and the swap spin made a wait (2026-11-04, [renderer_threads.md](https://github.com/arkeyan-forge/forge/blob/main/docs/runtime/gpu/renderer_threads.md) "SuperChargers and Imaginators at 60"): renderer 6.0 ms, **59.9 fps held**, gap p99 19 ms, process CPU 38.6 -> 31.6 ms a frame; with the drop to 30 on, no drop: the Academy 60.0 fps, `intro1` 59.2, `sky1` 59.1 [V]. The other 12 zones (sky2-3, nat1-3, quest1-3, mag1, dark1, final1-2) all hold **59.9-60.0 fps with the drop on, 0 drops in their window** (2026-11-05; one drop to 30 in `nat1`'s load, then back; [renderer_threads.md](https://github.com/arkeyan-forge/forge/blob/main/docs/runtime/gpu/renderer_threads.md) "The tour"): `tools/perf/game_perf.sh superchargers <disc> <map> 60 <out>` with `SECONDS_TO_RUN=470` |
 
+## Nightmare (2026-11-05) [SuperChargers] [V]
+**Offered from the start**: a new game's "Choose your play style!" (the difficulty, after the title) has four cards, Adventurer
+highlighted; the fourth, **Nightmare** ("Only for the most advanced players with a vast army of Skylanders! +30% Rewards"), has no
+padlock on a new save, and A takes it: `SUPERCHARGERS_0` is written and `fmv01` starts (runs `nm-sc-explore`, `nm-sc-accept`). The
+executable has no `nightmare_difficulty_unlocked` (Swap Force's and Imaginators' lock) and no other unlock name for it. So
+`nightmare_from_start` does nothing here (no `SetNightmareFromStart`: the runtime logs that it is ignored), and the launcher shows no
+toggle for this game.
+
 ## Where to start
 - Build: `cmake -S . -B build-superchargers -G Ninja -DCMAKE_BUILD_TYPE=Release -DSSA_GAME=superchargers`, `nice ninja -C build-superchargers -j4 ArkeyanRuntime`
   (the generated code: [research.md](research.md) "XenonRecomp"; the shader cache: `SKY_GAME=superchargers tools/shaders/build_cache.sh <disc> <dump dir>`
