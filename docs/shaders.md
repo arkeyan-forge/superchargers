@@ -18,9 +18,12 @@ others are built at run time: Bink's and the game's own).
 ## How we extract it
 1. Disc containers: Arkeyan-Builder's `tools/arkeyan-builder/igz_shaders.cpp`, through the runtime's archive reader
    (`runtime/host/art/alchemy_archive.cpp`), with `shaders=igz:/archives/shaders_xenon.pak` in `games/superchargers/game.txt`.
-   The fixtures: `SSAArtTest` (every IGA layout, both byte orders of v11) and `SSASkyBuildTest` (IGZ v6 to v9); on the real archive,
-   `TRAPTEAM_ARC=<shaders_xenon.pak> SSAArtTest` opens it as a verified v11 and unpacks its 105 entries.
+   The fixtures: `ArkeyanArtTest` (every IGA layout, both byte orders of v11) and `ArkeyanBuilderTest` (IGZ v6 to v9); on the real archive,
+   `TRAPTEAM_ARC=<shaders_xenon.pak> ArkeyanArtTest` opens it as a verified v11 and unpacks its 105 entries.
 2. Run-time containers: a run with `SKY_DUMP_SHADERS=<dir>`, the intro movies played (the Bink shaders come with the first logo).
+   A player's install does the same in its `movies` step: `movie_shaders=8` in `game.txt` (the game's own six at start, Bink's two with the
+   first logo, 2.6 s or more later) makes it wait for all eight; without the target a slow start missed Bink's and every movie was black
+   (2026-11-06, [render_bugs.md](https://github.com/arkeyan-forge/forge/blob/main/docs/runtime/gpu/render_bugs.md)) [V].
 3. `SKY_GAME=superchargers tools/shaders/build_cache.sh <disc> <folder>` with the disc's and the dump's containers merged by content;
    configure again and relink. Day 1's cache (dumps only): 1214 of 1215 translate; `203D384226E0FD37.ps` is rejected by the Metal
    compiler [V].

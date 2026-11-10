@@ -13,7 +13,7 @@ Status: day 2; the first level plays with a figure and a vehicle ([status](docs/
 | `game.txt` | what the player kit's Arkeyan-Builder knows about the game |
 | `config/` | XenonRecomp input: `SuperChargers.toml`, `SuperChargers_switch_tables.toml` |
 
-Build: `cmake -S . -B build-superchargers -G Ninja -DSSA_GAME=superchargers`. The generated code is `private/superchargers/ppc/` and
+Build: `cmake -S . -B build-superchargers -G Ninja -DARKEYAN_GAME=superchargers`. The generated code is `private/superchargers/ppc/` and
 the game's derived data `private/superchargers/`. The engine's hooks are in `engines/alchemy/`.
 
 ## Docs
@@ -21,5 +21,7 @@ the game's derived data `private/superchargers/`. The engine's hooks are in `eng
 |---|---|
 | [docs/status.md](docs/status.md) | disc identity, status, where to start, open problems |
 | [docs/boot.md](docs/boot.md) | what broke on the way to the first level |
+| [docs/art.md](docs/art.md) | the logo, background, portraits and menu theme the launcher reads from the disc |
+| [docs/toybox.md](docs/toybox.md) | the Toy Box: vehicle seats, the vehicles' gearbits, the badges of every toy |
 | [docs/shaders.md](docs/shaders.md) | the shaders on the disc (IGA v11 big-endian, IGZ v9) and the cache |
 | [docs/research.md](docs/research.md) | day 1's numbers, vehicles and the portal (leads) |
