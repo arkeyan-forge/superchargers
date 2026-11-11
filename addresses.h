@@ -87,6 +87,15 @@
 #define GAME_HOOK_String_Intern sub_82455A88
 #define GAME_HOOK_Font_CharMetrics sub_826A4548
 
+// The player's offline owner id (engines/alchemy/owner_id.cpp, docs/runtime/host/figures.md "Owner"), read from the code
+// (the function map from .pdata): Owner_Fetch, the only user of the key "offline_owner_id", looks it up in the options
+// save's key-value store and keeps it at +0xFC of the owner object (game::OwnerObject), else makes one (+0xF8's generator)
+// and stores it; its one caller is the start flow's sub_82EF6D00. The toy checks read +0xFC (sub_82D78ED8 "is this toy
+// mine": owner kind 1 against it, kind 0x80 against the Xbox Live id). Options_MostRecentSlot looks up the key
+// "most_recent_save_slot" (sub_8299BF58 is its setter); its one caller is the start flow's sub_82EF6B40, after the load.
+#define GAME_HOOK_Owner_Fetch sub_82D789B0
+#define GAME_HOOK_Options_MostRecentSlot sub_8299BF10
+
 #include <cstdint>
 #include <string_view>
 
@@ -129,4 +138,6 @@ namespace game
     constexpr uint32_t ZoneRequest = 0x83764394, ZoneRequestName = 44;
     constexpr std::string_view ZoneAfterIntro = "intro1/intro1";
     constexpr std::string_view ZonePrefix = ""; // zones are <map>/<map>
+    // The owner object's pointer and the id's offset in it (Owner_Fetch above).
+    constexpr uint32_t OwnerObject = 0x83762794, OwnerIdOffset = 0xFC;
 }
