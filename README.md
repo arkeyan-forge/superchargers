@@ -1,3 +1,5 @@
+> **This repository is archived.** Its content now lives in [arkeyan-forge/forge](https://github.com/arkeyan-forge/forge) (one repository for the whole project, since 2026-11-12).
+
 # games/superchargers/: Skylanders: SuperChargers (Alchemy engine)
 
 > **Purpose:** what is in SuperChargers' game folder, how to build it, and where its docs are · **Status:** current (2026-11-04) · **Tags:** [Xbox] [XDK] [Alchemy] [SuperChargers]
